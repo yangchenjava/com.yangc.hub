@@ -1,0 +1,35 @@
+option java_package = "com.yangc.bridge.comm.protocol.protobuf";
+option java_outer_classname = "ProtobufMessage";
+
+message Result {
+	required string uuid = 1;
+	required bool success = 2;
+	required string data = 3;
+}
+
+message Login {
+	required string uuid = 1;
+	required string username = 2;
+	required string password = 3;
+}
+
+message Chat {
+	required string uuid = 1;
+	required string from = 2;
+	required string to = 3;
+	required string data = 4;
+}
+
+message File {
+	required string uuid = 1;
+	required string from = 2;
+	required string to = 3;
+	required string fileName = 4;
+	required int64 fileSize = 5;
+	optional string fileMd5 = 6;
+	optional int32 offset = 7;
+	optional bytes data = 8;
+}
+
+message Heart {
+}

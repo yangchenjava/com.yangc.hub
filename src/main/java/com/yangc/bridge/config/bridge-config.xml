@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+						http://www.springframework.org/schema/context
+						http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+	<!-- 设置读取属性文件的加载器 -->
+	<context:property-placeholder location="classpath:jms.properties" ignore-unresolvable="true" />
+
+	<bean id="jmsFactory" class="org.apache.activemq.pool.PooledConnectionFactory" destroy-method="stop">
+		<property name="connectionFactory">
+			<bean class="org.apache.activemq.ActiveMQConnectionFactory">
+				<property name="brokerURL" value="${activemq.brokerURL}" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="messageListener" class="com.yangc.bridge.listener.DefaultMessageListener" />
+
+	<bean id="destination" class="org.apache.activemq.command.ActiveMQTopic">
+		<constructor-arg value="${activemq.destination}" />
+	</bean>
+
+	<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+		<property name="connectionFactory" ref="jmsFactory" />
+		<property name="destination" ref="destination" />
+		<property name="messageListener" ref="messageListener" />
+	</bean>
+
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory" ref="jmsFactory" />
+		<property name="defaultDestination" ref="destination" />
+		<!-- "true" for the Publish/Subscribe domain (Topics), "false" for the Point-to-Point domain (Queues) -->
+		<property name="pubSubDomain" value="true" />
+		<!-- 不持久化 -->
+		<property name="deliveryMode" value="1" />
+	</bean>
+</beans>

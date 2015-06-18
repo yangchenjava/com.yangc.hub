@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.yangc.bridge.bean.TBridgeCommon" table="T_BRIDGE_COMMON">
+		<comment>公共表</comment>
+		<id name="id" type="java.lang.Long">
+			<column name="ID" precision="22" scale="0" />
+			<generator class="identity" />
+		</id>
+		<property name="uuid" type="java.lang.String">
+			<column name="UUID" length="50">
+				<comment>UUID</comment>
+			</column>
+		</property>
+		<property name="from" type="java.lang.String">
+			<column name="FROM_USERNAME" length="200">
+				<comment>发送者</comment>
+			</column>
+		</property>
+		<property name="to" type="java.lang.String">
+			<column name="TO_USERNAME" length="200">
+				<comment>接收者</comment>
+			</column>
+		</property>
+		<property name="type" type="java.lang.Long">
+			<column name="TYPE" precision="1" scale="0">
+				<comment>消息类型:0文本;1文件</comment>
+			</column>
+		</property>
+		<property name="status" type="java.lang.Long">
+			<column name="STATUS" precision="1" scale="0">
+				<comment>消息状态:0未读;1已读</comment>
+			</column>
+		</property>
+		<property name="createTime" type="java.util.Date">
+			<column name="CREATE_TIME" length="7">
+				<comment>创建时间</comment>
+			</column>
+		</property>
+	</class>
+</hibernate-mapping>
