@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 import com.yangc.bridge.bean.ClientStatus;
 import com.yangc.bridge.bean.ServerStatus;
 import com.yangc.bridge.comm.cache.ChannelCache;
+import com.yangc.bridge.comm.codec.messagepack.MessagePackDecoderData;
+import com.yangc.bridge.comm.codec.messagepack.MessagePackEncoderData;
 import com.yangc.bridge.comm.codec.protobuf.ProtobufDecoderData;
 import com.yangc.bridge.comm.codec.protobuf.ProtobufEncoderData;
 import com.yangc.bridge.comm.codec.prototype.PrototypeDecoderData;
@@ -63,12 +66,17 @@ public class Server {
 				protected void initChannel(SocketChannel ch) throws Exception {
 					ChannelPipeline pipeline = ch.pipeline();
 					pipeline.addLast(new IdleStateHandler(TIMEOUT, 0, 0));
-					if (Server.CODEC.equals("prototype")) {
-						pipeline.addLast(new PrototypeEncoderData());
-						pipeline.addLast(new PrototypeDecoderData());
-					} else {
-						pipeline.addLast(new ProtobufEncoderData());
+					// 解码(Inbound)按照从头到尾的顺序执行
+					// 编码(Outbound)按照从尾到头的顺序执行
+					if (StringUtils.equals(Server.CODEC, "protobuf")) {
 						pipeline.addLast(new ProtobufDecoderData());
+						pipeline.addLast(new ProtobufEncoderData());
+					} else if (StringUtils.equals(Server.CODEC, "messagepack")) {
+						pipeline.addLast(new MessagePackDecoderData());
+						pipeline.addLast(new MessagePackEncoderData());
+					} else {
+						pipeline.addLast(new PrototypeDecoderData());
+						pipeline.addLast(new PrototypeEncoderData());
 					}
 					pipeline.addLast(serverHandler);
 				}
