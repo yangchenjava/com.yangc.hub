@@ -45,8 +45,6 @@ public class Server {
 	public static final int TIMEOUT = Integer.parseInt(Message.getMessage("bridge.timeout"));
 	public static final String CODEC = Message.getMessage("bridge.codec");
 
-	public static final String CHARSET_NAME = "UTF-8";
-
 	@Autowired
 	private ServerHandler serverHandler;
 	@Autowired

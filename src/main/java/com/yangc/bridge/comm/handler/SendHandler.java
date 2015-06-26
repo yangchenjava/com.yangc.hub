@@ -1,6 +1,7 @@
 package com.yangc.bridge.comm.handler;
 
 import io.netty.channel.Channel;
+import io.netty.util.CharsetUtil;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -41,11 +42,11 @@ public class SendHandler implements Runnable {
 	public static void sendResult(Channel channel, ResultBean result) throws Exception {
 		if (channel != null && channel.isActive()) {
 			if (StringUtils.equals(Server.CODEC, "prototype")) {
-				byte[] data = result.getData().getBytes(Server.CHARSET_NAME);
+				byte[] data = result.getData().getBytes(CharsetUtil.UTF_8);
 
 				ProtocolResult protocol = new ProtocolResult();
 				protocol.setContentType(ContentType.RESULT);
-				protocol.setUuid(result.getUuid().getBytes(Server.CHARSET_NAME));
+				protocol.setUuid(result.getUuid().getBytes(CharsetUtil.UTF_8));
 				protocol.setDataLength(1 + data.length);
 				protocol.setSuccess((byte) (result.isSuccess() ? 1 : 0));
 				protocol.setData(data);
@@ -65,13 +66,13 @@ public class SendHandler implements Runnable {
 	public static void sendChat(Channel channel, TBridgeChat chat) throws Exception {
 		if (channel != null && channel.isActive()) {
 			if (StringUtils.equals(Server.CODEC, "prototype")) {
-				byte[] from = chat.getFrom().getBytes(Server.CHARSET_NAME);
-				byte[] to = chat.getTo().getBytes(Server.CHARSET_NAME);
-				byte[] data = chat.getData().getBytes(Server.CHARSET_NAME);
+				byte[] from = chat.getFrom().getBytes(CharsetUtil.UTF_8);
+				byte[] to = chat.getTo().getBytes(CharsetUtil.UTF_8);
+				byte[] data = chat.getData().getBytes(CharsetUtil.UTF_8);
 
 				ProtocolChat protocol = new ProtocolChat();
 				protocol.setContentType(ContentType.CHAT);
-				protocol.setUuid(chat.getUuid().getBytes(Server.CHARSET_NAME));
+				protocol.setUuid(chat.getUuid().getBytes(CharsetUtil.UTF_8));
 				protocol.setFromLength((short) from.length);
 				protocol.setToLength((short) to.length);
 				protocol.setDataLength(data.length);
@@ -95,13 +96,13 @@ public class SendHandler implements Runnable {
 	public static void sendReadyFile(Channel channel, TBridgeFile file) throws Exception {
 		if (channel != null && channel.isActive()) {
 			if (StringUtils.equals(Server.CODEC, "prototype")) {
-				byte[] from = file.getFrom().getBytes(Server.CHARSET_NAME);
-				byte[] to = file.getTo().getBytes(Server.CHARSET_NAME);
-				byte[] fileName = file.getFileName().getBytes(Server.CHARSET_NAME);
+				byte[] from = file.getFrom().getBytes(CharsetUtil.UTF_8);
+				byte[] to = file.getTo().getBytes(CharsetUtil.UTF_8);
+				byte[] fileName = file.getFileName().getBytes(CharsetUtil.UTF_8);
 
 				ProtocolFile protocol = new ProtocolFile();
 				protocol.setContentType(ContentType.READY_FILE);
-				protocol.setUuid(file.getUuid().getBytes(Server.CHARSET_NAME));
+				protocol.setUuid(file.getUuid().getBytes(CharsetUtil.UTF_8));
 				protocol.setFromLength((short) from.length);
 				protocol.setToLength((short) to.length);
 				protocol.setFrom(from);
@@ -127,13 +128,13 @@ public class SendHandler implements Runnable {
 	public static void sendTransmitFile(Channel channel, TBridgeFile file) throws Exception {
 		if (channel != null && channel.isActive()) {
 			if (StringUtils.equals(Server.CODEC, "prototype")) {
-				byte[] from = file.getFrom().getBytes(Server.CHARSET_NAME);
-				byte[] to = file.getTo().getBytes(Server.CHARSET_NAME);
-				byte[] fileName = file.getFileName().getBytes(Server.CHARSET_NAME);
+				byte[] from = file.getFrom().getBytes(CharsetUtil.UTF_8);
+				byte[] to = file.getTo().getBytes(CharsetUtil.UTF_8);
+				byte[] fileName = file.getFileName().getBytes(CharsetUtil.UTF_8);
 
 				ProtocolFile protocol = new ProtocolFile();
 				protocol.setContentType(ContentType.TRANSMIT_FILE);
-				protocol.setUuid(file.getUuid().getBytes(Server.CHARSET_NAME));
+				protocol.setUuid(file.getUuid().getBytes(CharsetUtil.UTF_8));
 				protocol.setFromLength((short) from.length);
 				protocol.setToLength((short) to.length);
 				protocol.setDataLength(fileName.length + 46 + file.getData().length);
@@ -142,7 +143,7 @@ public class SendHandler implements Runnable {
 				protocol.setFileNameLength((short) fileName.length);
 				protocol.setFileName(fileName);
 				protocol.setFileSize(file.getFileSize());
-				protocol.setFileMd5(file.getFileMd5().getBytes(Server.CHARSET_NAME));
+				protocol.setFileMd5(file.getFileMd5().getBytes(CharsetUtil.UTF_8));
 				protocol.setOffset(file.getOffset());
 				protocol.setData(file.getData());
 
@@ -179,13 +180,13 @@ public class SendHandler implements Runnable {
 				int offset = -1;
 				byte[] data = new byte[bufferedLength];
 				if (StringUtils.equals(Server.CODEC, "prototype")) {
-					byte[] from = file.getFrom().getBytes(Server.CHARSET_NAME);
-					byte[] to = file.getTo().getBytes(Server.CHARSET_NAME);
-					byte[] fileName = file.getFileName().getBytes(Server.CHARSET_NAME);
+					byte[] from = file.getFrom().getBytes(CharsetUtil.UTF_8);
+					byte[] to = file.getTo().getBytes(CharsetUtil.UTF_8);
+					byte[] fileName = file.getFileName().getBytes(CharsetUtil.UTF_8);
 
 					ProtocolFile protocol = new ProtocolFile();
 					protocol.setContentType(ContentType.TRANSMIT_FILE);
-					protocol.setUuid(file.getUuid().getBytes(Server.CHARSET_NAME));
+					protocol.setUuid(file.getUuid().getBytes(CharsetUtil.UTF_8));
 					protocol.setFromLength((short) from.length);
 					protocol.setToLength((short) to.length);
 					protocol.setDataLength(fileName.length + 46 + data.length);
@@ -194,7 +195,7 @@ public class SendHandler implements Runnable {
 					protocol.setFileNameLength((short) fileName.length);
 					protocol.setFileName(fileName);
 					protocol.setFileSize(file.getFileSize());
-					protocol.setFileMd5(file.getFileMd5().getBytes(Server.CHARSET_NAME));
+					protocol.setFileMd5(file.getFileMd5().getBytes(CharsetUtil.UTF_8));
 
 					bis = new BufferedInputStream(new FileInputStream(unreadFile));
 					while ((offset = bis.read(data)) != -1) {
