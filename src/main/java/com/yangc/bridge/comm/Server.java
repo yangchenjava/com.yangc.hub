@@ -10,12 +10,16 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.net.ssl.SSLEngine;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +37,7 @@ import com.yangc.bridge.comm.codec.protobuf.ProtobufEncoderData;
 import com.yangc.bridge.comm.codec.prototype.PrototypeDecoderData;
 import com.yangc.bridge.comm.codec.prototype.PrototypeEncoderData;
 import com.yangc.bridge.comm.handler.ServerHandler;
+import com.yangc.bridge.comm.handler.ssl.SslContextFactory;
 import com.yangc.utils.Message;
 
 @Service("com.yangc.bridge.comm.Server")
@@ -59,10 +64,14 @@ public class Server {
 			ServerBootstrap b = new ServerBootstrap();
 			b.option(ChannelOption.SO_REUSEADDR, true).childOption(ChannelOption.SO_REUSEADDR, true).childOption(ChannelOption.SO_KEEPALIVE, true)
 					.childOption(ChannelOption.RCVBUF_ALLOCATOR, AdaptiveRecvByteBufAllocator.DEFAULT);
-			b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializer<SocketChannel>() {
+			b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler()).childHandler(new ChannelInitializer<SocketChannel>() {
 				@Override
 				protected void initChannel(SocketChannel ch) throws Exception {
 					ChannelPipeline pipeline = ch.pipeline();
+					SSLEngine sslEngine = SslContextFactory.getSslContext().createSSLEngine();
+					sslEngine.setNeedClientAuth(true);
+					sslEngine.setUseClientMode(false);
+					pipeline.addLast(new SslHandler(sslEngine));
 					pipeline.addLast(new IdleStateHandler(TIMEOUT, 0, 0));
 					// 解码(Inbound)按照从头到尾的顺序执行
 					// 编码(Outbound)按照从尾到头的顺序执行

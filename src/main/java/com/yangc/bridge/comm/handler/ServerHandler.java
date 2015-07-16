@@ -1,5 +1,6 @@
 package com.yangc.bridge.comm.handler;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -65,7 +66,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 			}
 		}
 		logger.info("channelInactive - " + remoteAddress);
-		UserBean user = ctx.attr(USER).getAndRemove();
+		UserBean user = ctx.channel().attr(USER).getAndRemove();
 		if (user != null && user.getChannelId() != user.getExpireChannelId()) {
 			ChannelManager.remove(user.getChannelId());
 			this.channelCache.removeChannelId(user.getUsername());
@@ -85,7 +86,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 		if (evt instanceof IdleStateEvent) {
 			IdleStateEvent event = (IdleStateEvent) evt;
 			if (event.state() == IdleState.READER_IDLE) {
-				ctx.disconnect();
+				ctx.channel().disconnect();
 			}
 		}
 	}
@@ -100,7 +101,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 			}
 		}
 		logger.error("exceptionCaught - " + remoteAddress + cause.getMessage(), cause);
-		ctx.disconnect();
+		ctx.channel().disconnect();
 	}
 
 	@Override
@@ -109,43 +110,43 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 		if (msg instanceof Byte) {
 			SendHandler.sendHeart(ctx.channel());
 		} else if (msg instanceof ResultBean) {
-			this.resultReceived(ctx, (ResultBean) msg);
+			this.resultReceived(ctx.channel(), (ResultBean) msg);
 		} else if (msg instanceof UserBean) {
-			this.loginReceived(ctx, (UserBean) msg);
+			this.loginReceived(ctx.channel(), (UserBean) msg);
 		} else if (msg instanceof TBridgeChat) {
-			this.chatReceived(ctx, (TBridgeChat) msg);
+			this.chatReceived(ctx.channel(), (TBridgeChat) msg);
 		} else if (msg instanceof TBridgeFile) {
-			this.fileReceived(ctx, (TBridgeFile) msg);
+			this.fileReceived(ctx.channel(), (TBridgeFile) msg);
 		} else {
-			ctx.disconnect();
+			ctx.channel().disconnect();
 		}
 	}
 
-	private void resultReceived(ChannelHandlerContext ctx, ResultBean result) throws Exception {
-		if (ctx.attr(USER).get() != null) {
-			this.resultProcessor.process(ctx.channel(), result);
+	private void resultReceived(Channel channel, ResultBean result) throws Exception {
+		if (channel.attr(USER).get() != null) {
+			this.resultProcessor.process(channel, result);
 		} else {
-			ctx.disconnect();
+			channel.disconnect();
 		}
 	}
 
-	private void loginReceived(ChannelHandlerContext ctx, UserBean user) throws Exception {
-		this.loginProcessor.process(ctx.channel(), user);
+	private void loginReceived(Channel channel, UserBean user) throws Exception {
+		this.loginProcessor.process(channel, user);
 	}
 
-	private void chatReceived(ChannelHandlerContext ctx, TBridgeChat chat) throws Exception {
-		if (ctx.attr(USER).get() != null) {
+	private void chatReceived(Channel channel, TBridgeChat chat) throws Exception {
+		if (channel.attr(USER).get() != null) {
 			this.chatAndFileProcessor.process(chat);
 		} else {
-			ctx.disconnect();
+			channel.disconnect();
 		}
 	}
 
-	private void fileReceived(ChannelHandlerContext ctx, TBridgeFile file) throws Exception {
-		if (ctx.attr(USER).get() != null) {
+	private void fileReceived(Channel channel, TBridgeFile file) throws Exception {
+		if (channel.attr(USER).get() != null) {
 			this.chatAndFileProcessor.process(file);
 		} else {
-			ctx.disconnect();
+			channel.disconnect();
 		}
 	}
 

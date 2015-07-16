@@ -1,0 +1,20 @@
+==服务端==
+私钥和证书仓库
+keytool -genkey -alias server -keyalg RSA -dname "cn=yangc,ou=yangc,o=china,l=liaoning,st=shenyang,c=cn" -validity 3650 -keypass 123456 -storepass 123456 -keystore server_keystore.jks
+
+自签名证书
+keytool -export -alias server -keystore server_keystore.jks -storepass 123456 -file server.cer
+
+==客户端==
+私钥和证书仓库
+keytool -genkey -alias client -keyalg RSA -dname "cn=yangc,ou=yangc,o=china,l=liaoning,st=shenyang,c=cn" -validity 3650 -keypass 123456 -storepass 123456 -keystore client_keystore.jks
+
+自签名证书
+keytool -export -alias client -keystore client_keystore.jks -storepass 123456 -file client.cer
+
+==导入==
+客户端证书导入到服务端仓库中
+keytool -import -alias server -file client.cer -keypass 123456 -storepass 123456 -keystore server_truststore.jks
+
+服务端证书导入到客户端仓库中
+keytool -import -alias client -file server.cer -keypass 123456 -storepass 123456 -keystore client_truststore.jks
