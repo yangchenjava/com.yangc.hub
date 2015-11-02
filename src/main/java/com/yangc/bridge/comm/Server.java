@@ -90,6 +90,7 @@ public class Server {
 			});
 			this.channelFuture = b.bind(IP, PORT).sync();
 			this.channelFuture.channel().closeFuture().sync();
+			this.channelFuture = null;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
@@ -111,6 +112,20 @@ public class Server {
 				init();
 			}
 		}).start();
+	}
+
+	/**
+	 * @功能: 重启netty服务(netty集群时别用!!!)
+	 * @作者: yangc
+	 * @创建日期: 2014年12月30日 下午2:06:27
+	 */
+	public void restart() {
+		logger.info("==========重启netty服务=========");
+		if (this.channelFuture != null) {
+			this.channelFuture.channel().close();
+		}
+		this.channelCache.clear();
+		this.start();
 	}
 
 	/**
