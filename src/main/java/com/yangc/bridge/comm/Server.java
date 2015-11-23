@@ -23,7 +23,8 @@ import javax.net.ssl.SSLEngine;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +44,7 @@ import com.yangc.utils.Message;
 @Service("com.yangc.bridge.comm.Server")
 public class Server {
 
-	private static final Logger logger = Logger.getLogger(Server.class);
+	private static final Logger logger = LogManager.getLogger(Server.class);
 
 	public static final String IP = Message.getMessage("bridge.ipAddress");
 	public static final int PORT = Integer.parseInt(Message.getMessage("bridge.port"));
