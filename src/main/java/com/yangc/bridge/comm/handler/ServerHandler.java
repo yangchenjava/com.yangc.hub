@@ -54,7 +54,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 				remoteAddress = address.getHostAddress();
 			}
 		}
-		logger.info("channelActive - " + remoteAddress);
+		logger.info("channelActive - {}", remoteAddress);
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 				remoteAddress = address.getHostAddress();
 			}
 		}
-		logger.info("channelInactive - " + remoteAddress);
+		logger.info("channelInactive - {}", remoteAddress);
 		UserBean user = ctx.channel().attr(USER).getAndRemove();
 		if (user != null && user.getChannelId() != user.getExpireChannelId()) {
 			ChannelManager.remove(user.getChannelId());
@@ -83,7 +83,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 				remoteAddress = address.getHostAddress();
 			}
 		}
-		logger.info("userEventTriggered - " + remoteAddress);
+		logger.info("userEventTriggered - {}", remoteAddress);
 		if (evt instanceof IdleStateEvent) {
 			IdleStateEvent event = (IdleStateEvent) evt;
 			if (event.state() == IdleState.READER_IDLE) {

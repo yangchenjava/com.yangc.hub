@@ -50,7 +50,7 @@ public class LoginProcessor {
 	private ExecutorService executorService;
 
 	public LoginProcessor() {
-		this.executorService = Executors.newSingleThreadScheduledExecutor();
+		this.executorService = Executors.newSingleThreadExecutor();
 	}
 
 	/**
@@ -94,7 +94,7 @@ public class LoginProcessor {
 					Long expireChannelId = channelCache.getChannelId(username);
 					if (expireChannelId != null) {
 						Channel expireChannel = ChannelManager.get(expireChannelId);
-						if (expireChannel != null && StringUtils.equals(expireChannel.attr(ServerHandler.USER).get().getUsername(), username)) {
+						if (expireChannel != null && expireChannel.attr(ServerHandler.USER).get() != null && StringUtils.equals(expireChannel.attr(ServerHandler.USER).get().getUsername(), username)) {
 							// 标识断线重连的channel
 							expireChannel.attr(ServerHandler.USER).get().setExpireChannelId(expireChannelId);
 							expireChannel.disconnect();

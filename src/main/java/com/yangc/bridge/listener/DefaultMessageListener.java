@@ -111,7 +111,8 @@ public class DefaultMessageListener implements MessageListener {
 						if (obj instanceof UserBean) {
 							UserBean user = (UserBean) obj;
 							Channel expireChannel = ChannelManager.get(user.getExpireChannelId());
-							if (expireChannel != null && StringUtils.equals(expireChannel.attr(ServerHandler.USER).get().getUsername(), this.username)) {
+							if (expireChannel != null && expireChannel.attr(ServerHandler.USER).get() != null
+									&& StringUtils.equals(expireChannel.attr(ServerHandler.USER).get().getUsername(), this.username)) {
 								// 标识断线重连的channel
 								expireChannel.attr(ServerHandler.USER).get().setExpireChannelId(user.getExpireChannelId());
 								expireChannel.disconnect();
