@@ -5,7 +5,6 @@
 	<version>1.0.0</version>
 	<packaging>war</packaging>
 	<name>com.yangc.hub</name>
-
 	<!-- 全局属性配置 -->
 	<properties>
 		<project.build.name>com.yangc.hub</project.build.name>
@@ -19,6 +18,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 					<source>1.6</source>
@@ -29,7 +29,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.0.1</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 				</configuration>
@@ -38,7 +38,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.0.2</version>
 				<executions>
 					<execution>
 						<id>make-a-jar</id>
@@ -56,7 +56,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.4</version>
+				<version>3.0.0</version>
 				<configuration>
 					<failOnMissingWebXml>false</failOnMissingWebXml>
 					<overlays>
@@ -116,7 +116,11 @@
 		</repository>
 		<repository>
 			<id>sonatype</id>
-			<url>http://repository.sonatype.org/content/groups/public/</url>
+			<url>http://repository.sonatype.org/content/groups/public</url>
+		</repository>
+		<repository>
+			<id>lds</id>
+			<url>https://code.lds.org/nexus/content/groups/main-repo</url>
 		</repository>
 	</repositories>
 
