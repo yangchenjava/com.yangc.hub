@@ -67,7 +67,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 			}
 		}
 		logger.info("channelInactive - {}", remoteAddress);
-		UserBean user = ctx.channel().attr(USER).getAndRemove();
+		// 移除缓存(断线重连的channel已经替换原有channel, 故排除)
+		UserBean user = ctx.channel().attr(USER).getAndSet(null);
 		if (user != null && user.getChannelId() != user.getExpireChannelId()) {
 			ChannelManager.remove(user.getChannelId());
 			this.channelCache.removeChannelId(user.getUsername());
