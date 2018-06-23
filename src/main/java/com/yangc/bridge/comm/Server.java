@@ -1,19 +1,5 @@
 package com.yangc.bridge.comm;
 
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.AdaptiveRecvByteBufAllocator;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.ssl.SslHandler;
-import io.netty.handler.timeout.IdleStateHandler;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +27,23 @@ import com.yangc.bridge.comm.handler.ServerHandler;
 import com.yangc.bridge.comm.handler.ssl.SslContextFactory;
 import com.yangc.utils.Message;
 
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.AdaptiveRecvByteBufAllocator;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.timeout.IdleStateHandler;
+
 @Service("com.yangc.bridge.comm.Server")
 public class Server {
 
@@ -59,36 +62,37 @@ public class Server {
 	private ChannelFuture channelFuture;
 
 	private void init() {
-		EventLoopGroup bossGroup = new NioEventLoopGroup();
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		EventLoopGroup bossGroup = Epoll.isAvailable() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
+		EventLoopGroup workerGroup = Epoll.isAvailable() ? new EpollEventLoopGroup() : new NioEventLoopGroup();
 		try {
 			ServerBootstrap b = new ServerBootstrap();
-			b.option(ChannelOption.SO_REUSEADDR, true).childOption(ChannelOption.SO_REUSEADDR, true).childOption(ChannelOption.SO_KEEPALIVE, true)
+			b.option(ChannelOption.SO_REUSEADDR, true).childOption(ChannelOption.SO_REUSEADDR, true).childOption(ChannelOption.SO_KEEPALIVE, true).childOption(ChannelOption.TCP_NODELAY, true)
 					.childOption(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator());
-			b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler()).childHandler(new ChannelInitializer<SocketChannel>() {
-				@Override
-				protected void initChannel(SocketChannel ch) throws Exception {
-					ChannelPipeline pipeline = ch.pipeline();
-					SSLEngine sslEngine = SslContextFactory.getSslContext().createSSLEngine();
-					sslEngine.setNeedClientAuth(true);
-					sslEngine.setUseClientMode(false);
-					pipeline.addLast(new SslHandler(sslEngine));
-					pipeline.addLast(new IdleStateHandler(TIMEOUT, 0, 0));
-					// 解码(Inbound)按照从头到尾的顺序执行
-					// 编码(Outbound)按照从尾到头的顺序执行
-					if (StringUtils.equals(Server.CODEC, "protobuf")) {
-						pipeline.addLast(new ProtobufDecoderData());
-						pipeline.addLast(new ProtobufEncoderData());
-					} else if (StringUtils.equals(Server.CODEC, "messagepack")) {
-						pipeline.addLast(new MessagePackDecoderData());
-						pipeline.addLast(new MessagePackEncoderData());
-					} else {
-						pipeline.addLast(new PrototypeDecoderData());
-						pipeline.addLast(new PrototypeEncoderData());
-					}
-					pipeline.addLast(serverHandler);
-				}
-			});
+			b.group(bossGroup, workerGroup).channel(Epoll.isAvailable() ? EpollServerSocketChannel.class : NioServerSocketChannel.class).handler(new LoggingHandler())
+					.childHandler(new ChannelInitializer<SocketChannel>() {
+						@Override
+						protected void initChannel(SocketChannel ch) throws Exception {
+							ChannelPipeline pipeline = ch.pipeline();
+							SSLEngine sslEngine = SslContextFactory.getSslContext().createSSLEngine();
+							sslEngine.setNeedClientAuth(true);
+							sslEngine.setUseClientMode(false);
+							pipeline.addLast(new SslHandler(sslEngine));
+							pipeline.addLast(new IdleStateHandler(TIMEOUT, 0, 0));
+							// 解码(Inbound)按照从头到尾的顺序执行
+							// 编码(Outbound)按照从尾到头的顺序执行
+							if (StringUtils.equals(Server.CODEC, "protobuf")) {
+								pipeline.addLast(new ProtobufDecoderData());
+								pipeline.addLast(new ProtobufEncoderData());
+							} else if (StringUtils.equals(Server.CODEC, "messagepack")) {
+								pipeline.addLast(new MessagePackDecoderData());
+								pipeline.addLast(new MessagePackEncoderData());
+							} else {
+								pipeline.addLast(new PrototypeDecoderData());
+								pipeline.addLast(new PrototypeEncoderData());
+							}
+							pipeline.addLast(serverHandler);
+						}
+					});
 			this.channelFuture = b.bind(IP, PORT).sync();
 			this.channelFuture.channel().closeFuture().sync();
 			this.channelFuture = null;
